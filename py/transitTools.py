@@ -24,7 +24,7 @@ def timeSeries(N = 300, samplingRatePerDay = 1., amplitude = 1., kneeFreq = 1, p
     fftFreqs = fft.fftfreq(N, d = lengthOfObservation)
 
     powerSpec = amplitude *(1 +  abs( (fftFreqs / kneeFreq)**(-1 * powerLawIndex)))
-
+    powerSpec[0] = 0.
 
     fftCorrelated = fftUncorrelated * sqrt(abs(powerSpec))
 
@@ -51,4 +51,6 @@ def timeSeries(N = 300, samplingRatePerDay = 1., amplitude = 1., kneeFreq = 1, p
 
     correlated = real(fft.ifft(nan_to_num(fftCorrelated)))
 
-    return (correlated, uncorrelated, [fftFreqs, powerSpec])
+    # return (correlated, uncorrelated, [fftFreqs, powerSpec])
+
+    return (lengthOfObservation * arange(float(N)), correlated)
