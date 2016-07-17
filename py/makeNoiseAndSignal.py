@@ -10,7 +10,9 @@ def twodlist(rows, cols):
     return a
 doPlot = True
 
-timeInMin = np.arange(0,30. * 60, 1)
+durationInMin = 30 * 60
+
+timeInMin = np.arange(0, durationInMin, 1)
 
 numTeams = 6
 numSignalCurvesPerTeam = 3
@@ -91,10 +93,12 @@ numNoiseCurvesPerTeam = 3
 powerLawIndices = [0,1,2]
 
 noiseCurves = twodlist(numTeams, numNoiseCurvesPerTeam)
+# import pdb
+# pdb.set_trace()
 
 for t in range(numTeams):
     for s in range(numNoiseCurvesPerTeam):
-        noiseCurves[t][s] = transitTools.noise(totalObservingTimeInMinutes = max(timeInMin), \
+        noiseCurves[t][s] = transitTools.noise(totalObservingTimeInMinutes = durationInMin, \
                                              samplingRatePerMinute = 1., \
                                              amplitude = 0.01, \
                                              powerLawIndex = powerLawIndices[s])
@@ -155,10 +159,6 @@ for g in range(numGroups):
                   'period' : np.random.uniform(low = pRange[0], high = pRange[1]) , 
                   'T0sInMinutes' : np.random.uniform(low = T0Range[0] , high = T0Range[1]), 
                   'noiseAmplitude' : noiseAmplitudes[s]}
-
-
-        
-
 
         signals[g][s] = transitTools.transit( timeInMin,    #array of time values.
                                               rho = 1.,          # density of main star (solar density)
