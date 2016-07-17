@@ -131,7 +131,8 @@ numSignalPlusNoiseCurves = 20
 pRange = [2,30]
 
 depthHighRange = np.array([1,1.5])
-depthMidRange = np.array([0.4, 0.7])
+#depthMidRange = np.array([0.4, 0.7])
+depthMidRange = np.array([0.7, 0.9])
 depthLowRange = np.array([0.1, 0.3])
 
 signalRanges = np.array([depthHighRange, depthMidRange, depthLowRange])
@@ -145,6 +146,8 @@ T0Range = np.array([500., 1300.]) / 2  #factor of 2 not understood.
 signals = twodlist(numGroups, numSignalTypes)
 noises = twodlist(numGroups, numSignalTypes)
 signalPlusNoiseCurves = twodlist(numGroups, numSignalTypes)
+signal_to_noise = twodlist(numGroups, numSignalTypes)
+signal_to_noise_chi = twodlist(numGroups, numSignalTypes)
 
 plt.figure('signal plus noise curves', figsize = (20, 40))
 # plt.figure("noise light curves")
@@ -173,7 +176,16 @@ for g in range(numGroups):
 
         signalPlusNoiseCurves[g][s] = signals[g][s] + noises[g][s]
 
-        
+	#signal_to_noise[g][s] = transitTools.signal2noise_rootN(noises[g][s], params['depth'], transit_duration) # what to do for duration?) 
+
+	#tophat model
+	tophat = transitTools.tophat_model(T0InMin, params['depth'], transit_duration)
+	trapezoid = transitTools.trapezoid_model(T0InMin, params['depth'], transit_duration, inner_duration) #how to calc durations?
+	signal_to_noise_chi[g][s] = transitTools.signal2noise_chi(noises[g][s], signalPlusNoiseCurves[g][s], tophat)
+
+        #add S/N to params
+
+
         plt.subplot(numGroups , numSignalTypes,g *  numSignalTypes +  s + 1)
         plt.plot(signalPlusNoiseCurves[g][s], \
                      label = 'team %i, curve %i, P = %4.2f, d = %4.2f, i = %4.2f' %(g,s,params['period'], params['depth'], params['impact'] ), color = 'b')
