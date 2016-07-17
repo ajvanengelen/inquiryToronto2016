@@ -10,6 +10,9 @@ def twodlist(rows, cols):
     return a
 doPlot = True
 
+#set the seed so that we always get the same curves.
+np.random.seed(5)
+
 durationInMin = 30 * 60
 
 timeInMin = np.arange(0, durationInMin, 1)
@@ -145,6 +148,7 @@ T0Range = np.array([500., 1300.]) / 2  #factor of 2 not understood.
 # params = twodlist(numGroups, numSignalTypes)
 signals = twodlist(numGroups, numSignalTypes)
 noises = twodlist(numGroups, numSignalTypes)
+
 signalPlusNoiseCurves = twodlist(numGroups, numSignalTypes)
 signal_to_noise = twodlist(numGroups, numSignalTypes)
 signal_to_noise_chi = twodlist(numGroups, numSignalTypes)
@@ -179,20 +183,21 @@ for g in range(numGroups):
 	#signal_to_noise[g][s] = transitTools.signal2noise_rootN(noises[g][s], params['depth'], transit_duration) # what to do for duration?) 
 
 	#tophat model
-	tophat = transitTools.tophat_model(T0InMin, params['depth'], transit_duration)
-	trapezoid = transitTools.trapezoid_model(T0InMin, params['depth'], transit_duration, inner_duration) #how to calc durations?
-	signal_to_noise_chi[g][s] = transitTools.signal2noise_chi(noises[g][s], signalPlusNoiseCurves[g][s], tophat)
-
+	# tophat = transitTools.tophat_model(T0InMin, params['depth'], transit_duration)
+	# trapezoid = transitTools.trapezoid_model(T0InMin, params['depth'], transit_duration, inner_duration) #how to calc durations?
+	signal_to_noise_chi[g][s] = transitTools.signal2noise_chi(noiseAmplitudes[s], signalPlusNoiseCurves[g][s], signals[g][s])
+        
+        params['signalToNoise'] = signal_to_noise_chi[g][s]
         #add S/N to params
 
 
         plt.subplot(numGroups , numSignalTypes,g *  numSignalTypes +  s + 1)
         plt.plot(signalPlusNoiseCurves[g][s], \
-                     label = 'team %i, curve %i, P = %4.2f, d = %4.2f, i = %4.2f' %(g,s,params['period'], params['depth'], params['impact'] ), color = 'b')
+                     label = 'team %i, curve %i, P = %4.2f, d = %4.2f, i = %4.2f, sn = %4.2f' %(g,s,params['period'], params['depth'], params['impact'], params['signalToNoise'] ), color = 'b')
 
         plt.plot(signals[g][s], color = 'r')
 
-        plt.legend(loc = 'lower right')
+        plt.legend(loc = 'lower right', fontsize = 9)
 
 
         pickle.dump(params, open('../data/params_%02i_%i.pkl' %(g, s), 'w'))

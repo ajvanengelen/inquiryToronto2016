@@ -81,37 +81,37 @@ def center(lst):
 
 # Define tophat model
 def tophat_model(t0=900,depth=0.01,dur=2*60.): # top hat model function
-	modelSignal = ones(1800)
-	modelSignal[(time >t0-(dur/2.)) & (time < t0+(dur/2.))]=1-depth	    
-	return modelSignal
+    modelSignal = ones(1800)
+    modelSignal[(time >t0-(dur/2.)) & (time < t0+(dur/2.))]=1-depth	    
+    return modelSignal
 
 # Define trapezoid function
 def trapezoid_model(t0=900,depth=0.01,dur=2*60.,inner_dur=2*60/2.):
-	modelSignal = ones(1800)
-        modelSignal[(time > t0-(inner_dur/2.)) & (time < t0+(inner_dur/2.))]=1-depth
-	angle_sides = numpy.linspace(start=1, stop=1-depth, num=(dur-inner_dur)/2., endpoint=False)
-	modelSignal[(time > t0-(dur/2.)) & (time <= t0-(inner_dur/2.))]=angle_sides
-	modelSignal[(time < t0+(dur/2.)) & (time >= t0+(inner_dur/2.))]=angle_sides[::-1]
-	return modelSignal
+    modelSignal = np.ones(1800)
+    modelSignal[(time > t0-(inner_dur/2.)) & (time < t0+(inner_dur/2.))]=1-depth
+    angle_sides = np.linspace(start=1, stop=1-depth, num=(dur-inner_dur)/2., endpoint=False)
+    modelSignal[(time > t0-(dur/2.)) & (time <= t0-(inner_dur/2.))]=angle_sides
+    modelSignal[(time < t0+(dur/2.)) & (time >= t0+(inner_dur/2.))]=angle_sides[::-1]
+    return modelSignal
 
 def chi_squared(noise,SignalPlusNoiseCurve,modelSignal):
-	chi_squared_value = sum(((SignalPlusNoiseCurve-modelSignal)/noise)**2)
-	return chi_squared_value
+    chi_squared_value = np.sum(((SignalPlusNoiseCurve-modelSignal)/noise)**2)
+    return chi_squared_value
 
 def signal2noise_chi(noise,SignalPlusNoiseCurve,modelSignal):
-	# chi square from tophat
-	chi_squared_value = chi_squared(noise,SignalPlusNoiseCurve,modelSignal)  
+    # chi square from tophat
+    chi_squared_value = chi_squared(noise,SignalPlusNoiseCurve,modelSignal)  
+    
+    # chi square for the null hypothesis
+    chi_squared_value_null = chi_squared(noise,SignalPlusNoiseCurve,ones(1800))  
 
-	# chi square for the null hypothesis
-	chi_squared_value_null = chi_squared(noise,SignalPlusNoiseCurve,ones(1800))  
-
-	# calc S/N
-	signal_to_noise = sqrt(abs(chi_squared_value_null - chi_squared_value))
-	return signal_to_noise
+    # calc S/N
+    signal_to_noise = np.sqrt(np.abs(chi_squared_value_null - chi_squared_value))
+    return signal_to_noise
 
 def signal2noise_rootN(noise,depth,duration):
-	signal_to_noise = (depth/noise)*sqrt(duration)
-	return signal_to_noise
+    signal_to_noise = (depth/noise)*np.sqrt(duration)
+    return signal_to_noise
 
 def transit( timeInMin,    #array of time values.
              rho=0.459,          # density of main star (solar density)
