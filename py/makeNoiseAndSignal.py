@@ -136,7 +136,7 @@ numSignalTypes = len(signalRanges)
 noiseAmplitudes =  np.array([0.01, 0.02, 0.1])
 
 impactRange = np.array([0, 0.8])
-T0Range = [500., 1300.]
+T0Range = np.array([500., 1300.]) / 2  #factor of 2 not understood.
 # params = twodlist(numGroups, numSignalTypes)
 signals = twodlist(numGroups, numSignalTypes)
 noises = twodlist(numGroups, numSignalTypes)
@@ -167,7 +167,7 @@ for g in range(numGroups):
                                               period = params['period'], # in days
                                               impact = params['impact'],  # between 0 and 1 yields a transit
                                               rprs = np.sqrt(params['depth'] / 100),    # radii ratio
-                                              T0InMin = 1800. / 2.)
+                                              T0InMin = params['T0sInMinutes'])
 
         noises[g][s] = noiseAmplitudes[s] * np.random.randn(len(timeInMin))
 
