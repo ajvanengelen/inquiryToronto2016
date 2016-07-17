@@ -210,7 +210,92 @@ for g in range(numGroups):
 
 plt.savefig('../plot/signalPlusNoiseCurves.pdf')  
 
+###########################################################################################
+# now do set of 20 for each team
+numSignalPlusNoiseCurves = 20
+
+# habitable zone parameters --- corresponding to a radius between 0.5 and 2 Earth radius (i.e. terrestrial planets) and an equilibrium temperature between 0 and 100 C
+# 152 < P < 388 days
+# 2.1e-5 < depth < 3.4e-4
+# b = 0
+# rho = 1
+
+T0Range = np.array([500., 1300.]) / 2  #factor of 2 not understood.
+impactRange = np.array([0, 0.8])
+
+pRangeH = np.array([152,388])
+depthRangeH = np.array([2.1e-5, 3.4e-4])
+noiseRangeH = np.array([1e-6, 3e-6]
+
+# non-habitable parameters
+pRange = np.array([2,30])
+depthRange = np.array([0.7, 1.5])
+noiseRange = np.array([0.01, 0.03]
+
+signals = twodlist(numGroups, numSignalPlusNoiseCurves)
+noises = twodlist(numGroups, numSignalPlusNoiseCurves)
+
+signalPlusNoiseCurves = twodlist(numGroups, numSignalPlusNoiseCurves)
+signal_to_noise_chi = twodlist(numGroups, numSignalPlusNoiseCurves)
+
+plt.figure('20 signal plus noise curves', figsize = (20, 40))
+# plt.figure("noise light curves")
+plt.clf()
 
 
+for g in range(numGroups):
+    for s in range(numSignalPlusNoiseCurves):
 
-    
+    	if s in [1,5,9,13,17]:
+
+            params = {'depth' : np.random.uniform(low = depthRangeH[0], high = depthRangeH[1]), 
+               	'impact' : 0., 
+               	'period' : np.random.uniform(low = pRangeH[0], high = pRangeH[1]) , 
+               	'T0sInMinutes' : np.random.uniform(low = T0Range[0] , high = T0Range[1]), 
+               	'noiseAmplitude' : np.random.uniform(low = noiseRangeH[0], high = noiseRangeH[1])}
+
+	else
+
+            params = {'depth' : np.random.uniform(low = depthRange[0], high = depthRange[1]), 
+            	'impact' np.random.uniform(low = impactRange[0], high = impactRange[1]),:  
+                'period' : np.random.uniform(low = pRange[0], high = pRange[1]) , 
+                'T0sInMinutes' : np.random.uniform(low = T0Range[0] , high = T0Range[1]), 
+                'noiseAmplitude' : np.random.uniform(low = noiseRange[0], high = noiseRange[1])}
+        
+	signals[g][s] = transitTools.transit( timeInMin,    #array of time values.
+                                              rho = 1.,          # density of main star (solar density)
+                                              ld1=0.2,            # limb darkening coefficients (2 coeff's for quadratic limb darkening)
+                                              ld2=0.4,
+                                              period = params['period'], # in days
+                                              impact = params['impact'],  # between 0 and 1 yields a transit
+                                              rprs = np.sqrt(params['depth'] / 100),    # radii ratio
+                                              T0InMin = params['T0sInMinutes'])
+
+        noises[g][s] = noiseAmplitudes[s] * np.random.randn(len(timeInMin))
+
+        signalPlusNoiseCurves[g][s] = signals[g][s] + noises[g][s]
+
+	signal_to_noise_chi[g][s] = transitTools.signal2noise_chi(noiseAmplitudes[s], signalPlusNoiseCurves[g][s], signals[g][s])
+        
+        params['signalToNoise'] = signal_to_noise_chi[g][s]
+
+
+        plt.subplot(numGroups , numSignalPlusNoiseCurves,g *  numSignalPlusNoiseCurves +  s + 1)
+        plt.plot(signalPlusNoiseCurves[g][s], \
+                     label = 'team %i, curve %i, P = %4.2f, d = %4.2f, i = %4.2f, sn = %4.2f' %(g,s,params['period'], params['depth'], params['impact'], params['signalToNoise'] ), color = 'b')
+
+        plt.plot(signals[g][s], color = 'r')
+
+        plt.legend(loc = 'lower right', fontsize = 9)
+
+
+        pickle.dump(params, open('../data/params_20_%02i_%i.pkl' %(g, s), 'w'))
+        
+        np.savetxt('../data/signalPlusNoiseCurve_20_%02i_%i.txt' %(g, s), signalPlusNoiseCurves[g][s],  header = 'data in one-minute intervals')
+        np.savetxt('../data/signalPlusNoisePeriod_20_%02i_%i.txt' %(g, s), [params['period']], header = 'signal period in days')
+
+        
+
+
+plt.savefig('../plot/signalPlusNoiseCurves_20.pdf')  
+
