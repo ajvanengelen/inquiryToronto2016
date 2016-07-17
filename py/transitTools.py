@@ -25,9 +25,12 @@ def noise(totalObservingTimeInMinutes = 1800,  samplingRatePerMinute = 1., ampli
 
     fftFreqs = fft.fftfreq(N, d = lengthOfObservationInMinutes)
 
+    
+    powerSpec = fftFreqs.copy()
+    powerSpec[:] = 0
     #power spectrum white white and 1/f noise components.
-    powerSpec = amplitude**2 *(1 +  abs( (fftFreqs / kneeFreq)**(-1 * powerLawIndex)))
-    powerSpec[0] = 0.
+    powerSpec[1:] = amplitude**2 *(1 +  abs( (fftFreqs[1:] / kneeFreq)**(-1 * powerLawIndex)))
+    powerSpec[0] = amplitude**2
 
     #multiply by square root of the power spectrum.
     fftCorrelated = fftUncorrelated * sqrt(abs(powerSpec))
