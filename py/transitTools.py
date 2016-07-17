@@ -86,9 +86,11 @@ def transit( timeInMin,    #array of time values.
              period = 1000, # in days
              impact=0,  # between 0 and 1 yields a transit
              rprs=0.4,    # radii ratio
-             T0 = 1800. / (24 * 60) / 2., 
+             T0InMin = 1800. / 2., 
              ): #mid-transit time
-    
+
+
+
     #
     #offset = 0
     #rvamp = 13.
@@ -111,7 +113,7 @@ def transit( timeInMin,    #array of time values.
     Msun = 1.989e33                    # mass of the sun (cgs)
     rhosun = Msun/(4./3*np.pi*Rsun**3) # density of the sun
 
-
+    T0 = T0InMin/ (24. * 30.) 
     # Model
     M = ktransit.LCModel()
 

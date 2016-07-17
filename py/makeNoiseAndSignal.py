@@ -37,6 +37,12 @@ impactParameters = np.array([[0.27, 0.41, 0.63], \
                         [0.67, 0.52, 0.21], \
                         [0.18, 0.36, 0.43], \
                         [0.68, 0.26, 0.54]])
+T0sInMinutes = np.array([[  900.,  1000.,  1050.],
+                      [  750.,   850.,   500.],
+                      [  600.,   650.,   700.],
+                      [ 1250.,  1100.,   750.],
+                      [  500.,  1250.,  1000.],
+                      [  550.,  1100.,   850.]]) / 2.
 
 rhos = np.ones((numTeams , numSignalCurvesPerTeam))
 
@@ -53,8 +59,8 @@ for t in range(numTeams):
                                   ld2=0.4,
                                   period = periodsInDays[t,s], # in days
                                   impact = impactParameters[t,s],  # between 0 and 1 yields a transit
-                                  rprs = np.sqrt(depths[t,s]),    # radii ratio
-                                  T0 = 1800. / (24 * 60) / 2.)
+                                  rprs = np.sqrt(depths[t,s]),     # radii ratio
+                                  T0InMin = T0sInMinutes[t,s])
 
 
 
@@ -69,12 +75,13 @@ if doPlot:
                          label = 'team %i, curve %i, P = %4.2f, d = %4.2f, i = %4.2f' %(t,s,periodsInDays[t,s], depthsInPercents[t,s], impactParameters[t,s], ))
             plt.ylim([.96, 1.02])
             plt.legend(loc = 'lower right')
-
-plt.savefig('../plot/signalCurves.pdf')  
+    # plt.show()
+    plt.savefig('../plot/signalCurves.pdf')  
 
 for t in range(numTeams):
     for s in range(numSignalCurvesPerTeam):
-        np.savetxt('../data/signalcurve_%i_%i.txt' %(t, s), signalCurves[t][s])
+        np.savetxt('../data/signalcurve_%i_%i.txt' %(t, s), signalCurves[t][s], header = 'data in one-minute intervals')
+        np.savetxt('../data/signalperiod_%i_%i.txt' %(t, s), [periodsInDays[t,s]], header = 'period in days')
 
         
 
@@ -110,7 +117,8 @@ plt.savefig('../plot/noiseCurves.pdf')
 
 for t in range(numTeams):
     for s in range(numNoiseCurvesPerTeam):
-        np.savetxt('../data/noisecurve_%i_%i.txt' %(t, s), noiseCurves[t][s])
+        np.savetxt('../data/noisecurve_%i_%i.txt' %(t, s), noiseCurves[t][s], header = 'data in one-minute intervals')
+        
 ###########################################################################################
 
 numGroups = 12
@@ -128,7 +136,7 @@ numSignalTypes = len(signalRanges)
 noiseAmplitudes =  np.array([0.01, 0.02, 0.1])
 
 impactRange = np.array([0, 0.8])
-
+T0Range = [500., 1300.]
 # params = twodlist(numGroups, numSignalTypes)
 signals = twodlist(numGroups, numSignalTypes)
 noises = twodlist(numGroups, numSignalTypes)
@@ -138,12 +146,14 @@ plt.figure('signal plus noise curves', figsize = (20, 40))
 # plt.figure("noise light curves")
 plt.clf()
 
+
 for g in range(numGroups):
     for s in range(numSignalTypes):
 
         params = {'depth' : np.random.uniform(low = signalRanges[s,0], high = signalRanges[s,1]), 
                   'impact' : np.random.uniform(low = impactRange[0], high = impactRange[1]), 
                   'period' : np.random.uniform(low = pRange[0], high = pRange[1]) , 
+                  'T0sInMinutes' : np.random.uniform(low = T0Range[0] , high = T0Range[1]), 
                   'noiseAmplitude' : noiseAmplitudes[s]}
 
 
@@ -157,7 +167,7 @@ for g in range(numGroups):
                                               period = params['period'], # in days
                                               impact = params['impact'],  # between 0 and 1 yields a transit
                                               rprs = np.sqrt(params['depth'] / 100),    # radii ratio
-                                              T0 = 1800. / (24 * 60) / 2.)
+                                              T0InMin = 1800. / 2.)
 
         noises[g][s] = noiseAmplitudes[s] * np.random.randn(len(timeInMin))
 
@@ -175,7 +185,8 @@ for g in range(numGroups):
 
         pickle.dump(params, open('../data/params_%02i_%i.pkl' %(g, s), 'w'))
         
-        np.savetxt('../data/signalPlusNoiseCurve_%02i_%i.txt' %(g, s), signalPlusNoiseCurves[g][s])
+        np.savetxt('../data/signalPlusNoiseCurve_%02i_%i.txt' %(g, s), signalPlusNoiseCurves[g][s],  header = 'data in one-minute intervals')
+        np.savetxt('../data/signalPlusNoisePeriod_%02i_%i.txt' %(g, s), [params['period']], header = 'signal period in days')
 
         
 
