@@ -36,12 +36,13 @@ depthsInPercents = np.array([[1.2, 0.4, 1.9], \
                         [1.4, 0.6, 1.2]])
 depths = depthsInPercents / 100.
 
-impactParameters = np.array([[0.27, 0.41, 0.63], \
-                        [0.39, 0.71, 0.23], \
-                        [0.53, 0.31, 0.62], \
-                        [0.67, 0.52, 0.21], \
-                        [0.18, 0.36, 0.43], \
-                        [0.68, 0.26, 0.54]])
+impactParameters = np.zeros((numTeams, numSignalCurvesPerTeam))
+# impactParameters = np.array([[0.27, 0.41, 0.63], \
+#                         [0.39, 0.71, 0.23], \
+#                         [0.53, 0.31, 0.62], \
+#                         [0.67, 0.52, 0.21], \
+#                         [0.18, 0.36, 0.43], \
+#                         [0.68, 0.26, 0.54]])
 # T0sInMinutes = np.array([[  900.,  1000.,  1050.],
 #                       [  750.,   850.,   500.],
 #                       [  600.,   650.,   700.],
@@ -144,7 +145,7 @@ numSignalTypes = len(signalRanges)
 
 noiseAmplitudes =  np.array([0.01, 0.02, 0.1])
 
-impactRange = np.array([0, 0.8])
+impactRange = np.array([0, 0])
 # T0Range = np.array([500., 1300.]) / 2  #factor of 2 not understood.
 T0 = 900 / 2# np.array([500., 1300.]) / 2  #factor of 2 not understood.
 
@@ -224,7 +225,7 @@ numSignalPlusNoiseCurves = 20
 # rho = 1
 T0 = 900./2
 # T0Range = np.array([500., 1300.]) / 2  #factor of 2 not understood.
-impactRange = np.array([0, 0.8])
+impactRange = np.array([0, 0])
 
 pRangeH = np.array([152,388])
 depthRangeH = np.array([2.1e-3, 3.4e-2])
@@ -243,11 +244,16 @@ signal_to_noise_chi = twodlist(numGroups, numSignalPlusNoiseCurves)
 
 
 highNoiseVal = 0.1
-for g in range(numGroups):
 
+
+for g in range(numGroups):
+    
     plt.figure('signal plus noise curves, group %02g' % g, figsize = (12, 15))
 
     plt.clf()
+
+    toWriteCurves = np.zeros((numSignalPlusNoiseCurves, durationInMin))
+    toWritePeriods = np.zeros(numSignalPlusNoiseCurves)
 
     for s in range(numSignalPlusNoiseCurves):
 
@@ -303,13 +309,14 @@ for g in range(numGroups):
 
         plt.figtext(.5 , .95, '20 curves for group %02i' %g, fontsize = 20, horizontalalignment = 'center')
         
-        pickle.dump(params, open('../data/params_20_%02i_%i.pkl' %(g, s), 'w'))
-        
-        np.savetxt('../data/signalPlusNoiseCurve_20_%02i_%i.txt' %(g, s), signalPlusNoiseCurves[g][s],  header = 'data in one-minute intervals')
-        np.savetxt('../data/signalPlusNoisePeriod_20_%02i_%i.txt' %(g, s), [params['period']], header = 'signal period in days')
+        pickle.dump(params, open('../data/params_twentyCurves_%02i_%i.pkl' %(g, s), 'w'))
 
+        toWriteCurves[s,:] = signalPlusNoiseCurves[g][s]
+        toWritePeriods[s]  = params['period']
         
+    np.savetxt('../data/signalPlusNoiseCurve_twentyCurves_%02i.txt' %(g), np.transpose(toWriteCurves),  header = 'data in one-minute intervals')
 
+    np.savetxt('../data/signalPlusNoisePeriod_twentyCurves_%02i.txt' %(g), np.transpose(toWritePeriods), header = 'signal periods in days')
 
     plt.savefig('../plot/signalPlusNoiseCurves_%02g.pdf' % g)  
 
