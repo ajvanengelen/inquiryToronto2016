@@ -1,7 +1,7 @@
 (dp0
 S'impact'
 p1
-F0.4276694830703064
+F0.0
 sS'noiseAmplitude'
 p2
 cnumpy.core.multiarray
@@ -40,7 +40,7 @@ sS'signalToNoise'
 p16
 g3
 (g7
-S'\xb7\n"l\xd5\x18"@'
+S'\x15,\x04\x14w\xbb#@'
 p17
 tp18
 Rp19
