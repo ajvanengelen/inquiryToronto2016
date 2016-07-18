@@ -224,13 +224,13 @@ T0Range = np.array([500., 1300.]) / 2  #factor of 2 not understood.
 impactRange = np.array([0, 0.8])
 
 pRangeH = np.array([152,388])
-depthRangeH = np.array([2.1e-5, 3.4e-4])
-noiseRangeH = np.array([1e-6, 3e-6]
+depthRangeH = np.array([2.1e-3, 3.4e-2])
+noiseRangeH = np.array([3e-4, 7e-4])
 
 # non-habitable parameters
 pRange = np.array([2,30])
 depthRange = np.array([0.7, 1.5])
-noiseRange = np.array([0.01, 0.03]
+noiseRange = np.array([0.01, 0.05])
 
 signals = twodlist(numGroups, numSignalPlusNoiseCurves)
 noises = twodlist(numGroups, numSignalPlusNoiseCurves)
@@ -238,12 +238,14 @@ noises = twodlist(numGroups, numSignalPlusNoiseCurves)
 signalPlusNoiseCurves = twodlist(numGroups, numSignalPlusNoiseCurves)
 signal_to_noise_chi = twodlist(numGroups, numSignalPlusNoiseCurves)
 
-plt.figure('20 signal plus noise curves', figsize = (20, 40))
-# plt.figure("noise light curves")
-plt.clf()
 
-
+highNoiseVal = 0.1
 for g in range(numGroups):
+
+    plt.figure('signal plus noise curves, group %02g' % g, figsize = (12, 15))
+
+    plt.clf()
+
     for s in range(numSignalPlusNoiseCurves):
 
     	if s in [1,5,9,13,17]:
@@ -254,10 +256,18 @@ for g in range(numGroups):
                	'T0sInMinutes' : np.random.uniform(low = T0Range[0] , high = T0Range[1]), 
                	'noiseAmplitude' : np.random.uniform(low = noiseRangeH[0], high = noiseRangeH[1])}
 
-	else
+	elif s in [14]:
 
             params = {'depth' : np.random.uniform(low = depthRange[0], high = depthRange[1]), 
-            	'impact' np.random.uniform(low = impactRange[0], high = impactRange[1]),:  
+            	'impact': np.random.uniform(low = impactRange[0], high = impactRange[1]),  
+                'period' : np.random.uniform(low = pRange[0], high = pRange[1]) , 
+                'T0sInMinutes' : np.random.uniform(low = T0Range[0] , high = T0Range[1]), 
+                'noiseAmplitude' : highNoiseVal}
+        
+	else:
+
+            params = {'depth' : np.random.uniform(low = depthRange[0], high = depthRange[1]), 
+            	'impact': np.random.uniform(low = impactRange[0], high = impactRange[1]),  
                 'period' : np.random.uniform(low = pRange[0], high = pRange[1]) , 
                 'T0sInMinutes' : np.random.uniform(low = T0Range[0] , high = T0Range[1]), 
                 'noiseAmplitude' : np.random.uniform(low = noiseRange[0], high = noiseRange[1])}
@@ -271,24 +281,25 @@ for g in range(numGroups):
                                               rprs = np.sqrt(params['depth'] / 100),    # radii ratio
                                               T0InMin = params['T0sInMinutes'])
 
-        noises[g][s] = noiseAmplitudes[s] * np.random.randn(len(timeInMin))
+        noises[g][s] = params['noiseAmplitude'] * np.random.randn(len(timeInMin))
 
         signalPlusNoiseCurves[g][s] = signals[g][s] + noises[g][s]
 
-	signal_to_noise_chi[g][s] = transitTools.signal2noise_chi(noiseAmplitudes[s], signalPlusNoiseCurves[g][s], signals[g][s])
+	signal_to_noise_chi[g][s] = transitTools.signal2noise_chi(params['noiseAmplitude'], signalPlusNoiseCurves[g][s], signals[g][s])
         
         params['signalToNoise'] = signal_to_noise_chi[g][s]
 
 
-        plt.subplot(numGroups , numSignalPlusNoiseCurves,g *  numSignalPlusNoiseCurves +  s + 1)
+        plt.subplot(10,2, s + 1)
         plt.plot(signalPlusNoiseCurves[g][s], \
-                     label = 'team %i, curve %i, P = %4.2f, d = %4.2f, i = %4.2f, sn = %4.2f' %(g,s,params['period'], params['depth'], params['impact'], params['signalToNoise'] ), color = 'b')
+                     label = 'curve %i, P = %4.2f, d = %4.2f, i = %4.2f, sn = %4.2f' %(s,params['period'], params['depth'], params['impact'], params['signalToNoise'] ), color = 'b')
 
         plt.plot(signals[g][s], color = 'r')
 
         plt.legend(loc = 'lower right', fontsize = 9)
 
-
+        plt.figtext(.5 , .95, '20 curves for group %02i' %g, fontsize = 20, horizontalalignment = 'center')
+        
         pickle.dump(params, open('../data/params_20_%02i_%i.pkl' %(g, s), 'w'))
         
         np.savetxt('../data/signalPlusNoiseCurve_20_%02i_%i.txt' %(g, s), signalPlusNoiseCurves[g][s],  header = 'data in one-minute intervals')
@@ -297,5 +308,5 @@ for g in range(numGroups):
         
 
 
-plt.savefig('../plot/signalPlusNoiseCurves_20.pdf')  
+    plt.savefig('../plot/signalPlusNoiseCurves_%02g.pdf' % g)  
 
