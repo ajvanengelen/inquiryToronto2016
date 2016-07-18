@@ -35,12 +35,12 @@ p14
 F1.2986834318370333
 sS'T0sInMinutes'
 p15
-F392.93884637959945
+I450
 sS'signalToNoise'
 p16
 g3
 (g7
-S'\x85j\xccA\xc2-6@'
+S'7\xbb\xd0;Mk5@'
 p17
 tp18
 Rp19

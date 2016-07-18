@@ -42,13 +42,14 @@ impactParameters = np.array([[0.27, 0.41, 0.63], \
                         [0.67, 0.52, 0.21], \
                         [0.18, 0.36, 0.43], \
                         [0.68, 0.26, 0.54]])
-T0sInMinutes = np.array([[  900.,  1000.,  1050.],
-                      [  750.,   850.,   500.],
-                      [  600.,   650.,   700.],
-                      [ 1250.,  1100.,   750.],
-                      [  500.,  1250.,  1000.],
-                      [  550.,  1100.,   850.]]) / 2.
+# T0sInMinutes = np.array([[  900.,  1000.,  1050.],
+#                       [  750.,   850.,   500.],
+#                       [  600.,   650.,   700.],
+#                       [ 1250.,  1100.,   750.],
+#                       [  500.,  1250.,  1000.],
+#                       [  550.,  1100.,   850.]]) / 2.
 
+T0InMinutes = 900. / 2
 rhos = np.ones((numTeams , numSignalCurvesPerTeam))
 
 signalCurves = twodlist(numTeams, numSignalCurvesPerTeam)
@@ -65,7 +66,7 @@ for t in range(numTeams):
                                   period = periodsInDays[t,s], # in days
                                   impact = impactParameters[t,s],  # between 0 and 1 yields a transit
                                   rprs = np.sqrt(depths[t,s]),     # radii ratio
-                                  T0InMin = T0sInMinutes[t,s])
+                                  T0InMin = T0InMinutes)
 
 
 
@@ -144,7 +145,9 @@ numSignalTypes = len(signalRanges)
 noiseAmplitudes =  np.array([0.01, 0.02, 0.1])
 
 impactRange = np.array([0, 0.8])
-T0Range = np.array([500., 1300.]) / 2  #factor of 2 not understood.
+# T0Range = np.array([500., 1300.]) / 2  #factor of 2 not understood.
+T0 = 900 / 2# np.array([500., 1300.]) / 2  #factor of 2 not understood.
+
 # params = twodlist(numGroups, numSignalTypes)
 signals = twodlist(numGroups, numSignalTypes)
 noises = twodlist(numGroups, numSignalTypes)
@@ -164,7 +167,7 @@ for g in range(numGroups):
         params = {'depth' : np.random.uniform(low = signalRanges[s,0], high = signalRanges[s,1]), 
                   'impact' : np.random.uniform(low = impactRange[0], high = impactRange[1]), 
                   'period' : np.random.uniform(low = pRange[0], high = pRange[1]) , 
-                  'T0sInMinutes' : np.random.uniform(low = T0Range[0] , high = T0Range[1]), 
+                  'T0sInMinutes' : T0, 
                   'noiseAmplitude' : noiseAmplitudes[s]}
 
         signals[g][s] = transitTools.transit( timeInMin,    #array of time values.
@@ -219,8 +222,8 @@ numSignalPlusNoiseCurves = 20
 # 2.1e-5 < depth < 3.4e-4
 # b = 0
 # rho = 1
-
-T0Range = np.array([500., 1300.]) / 2  #factor of 2 not understood.
+T0 = 900./2
+# T0Range = np.array([500., 1300.]) / 2  #factor of 2 not understood.
 impactRange = np.array([0, 0.8])
 
 pRangeH = np.array([152,388])
@@ -253,7 +256,7 @@ for g in range(numGroups):
             params = {'depth' : np.random.uniform(low = depthRangeH[0], high = depthRangeH[1]), 
                	'impact' : 0., 
                	'period' : np.random.uniform(low = pRangeH[0], high = pRangeH[1]) , 
-               	'T0sInMinutes' : np.random.uniform(low = T0Range[0] , high = T0Range[1]), 
+               	'T0sInMinutes' : T0, 
                	'noiseAmplitude' : np.random.uniform(low = noiseRangeH[0], high = noiseRangeH[1])}
 
 	elif s in [14]:
@@ -261,7 +264,7 @@ for g in range(numGroups):
             params = {'depth' : np.random.uniform(low = depthRange[0], high = depthRange[1]), 
             	'impact': np.random.uniform(low = impactRange[0], high = impactRange[1]),  
                 'period' : np.random.uniform(low = pRange[0], high = pRange[1]) , 
-                'T0sInMinutes' : np.random.uniform(low = T0Range[0] , high = T0Range[1]), 
+                'T0sInMinutes' : T0, 
                 'noiseAmplitude' : highNoiseVal}
         
 	else:
@@ -269,7 +272,7 @@ for g in range(numGroups):
             params = {'depth' : np.random.uniform(low = depthRange[0], high = depthRange[1]), 
             	'impact': np.random.uniform(low = impactRange[0], high = impactRange[1]),  
                 'period' : np.random.uniform(low = pRange[0], high = pRange[1]) , 
-                'T0sInMinutes' : np.random.uniform(low = T0Range[0] , high = T0Range[1]), 
+                'T0sInMinutes' : T0,
                 'noiseAmplitude' : np.random.uniform(low = noiseRange[0], high = noiseRange[1])}
         
 	signals[g][s] = transitTools.transit( timeInMin,    #array of time values.

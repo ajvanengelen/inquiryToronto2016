@@ -80,13 +80,13 @@ def center(lst):
     return lst
 
 # Define tophat model
-def tophat_model(t0=900,depth=0.01,dur=2*60.): # top hat model function
+def tophat_model(time, t0=900,depth=0.01,dur=2*60.): # top hat model function
     modelSignal = ones(1800)
     modelSignal[(time >t0-(dur/2.)) & (time < t0+(dur/2.))]=1-depth	    
     return modelSignal
 
 # Define trapezoid function
-def trapezoid_model(t0=900,depth=0.01,dur=2*60.,inner_dur=2*60/2.):
+def trapezoid_model(time, t0=900,depth=0.01,dur=2*60.,inner_dur=2*60/2.):
     modelSignal = np.ones(1800)
     modelSignal[(time > t0-(inner_dur/2.)) & (time < t0+(inner_dur/2.))]=1-depth
     angle_sides = np.linspace(start=1, stop=1-depth, num=(dur-inner_dur)/2., endpoint=False)
